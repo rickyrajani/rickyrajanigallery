@@ -1,0 +1,10 @@
+# ai.txt: Ricky Rajani Gallery
+# No artwork, images, text or other content on this site may be used for
+# AI or machine-learning training, datasets, or generative models.
+User-Agent: *
+Disallow: /
+Disallow: *.jpg
+Disallow: *.jpeg
+Disallow: *.png
+Disallow: *.woff
+Disallow: *.html

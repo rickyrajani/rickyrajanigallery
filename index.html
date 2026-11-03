@@ -9,6 +9,9 @@
 <meta property="og:image" content="https://rickyrajanigallery.com/assets/img/sitara-5-becoming-sitara.jpg">
 <meta property="og:url" content="https://rickyrajanigallery.com/">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="robots" content="index, follow, noai, noimageai">
+<meta name="tdm-reservation" content="1">
+<meta name="copyright" content="© Ricky Rajani. All rights reserved. No AI training or text and data mining.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="assets/fonts/SignaritaZhai.woff" as="font" type="font/woff" crossorigin>
 <title>Ricky Rajani Gallery</title>
@@ -166,6 +169,7 @@ main{position:relative; z-index:2}
 .sig{font-family:var(--f-display); font-style:italic; font-weight:300; font-size:44px; line-height:1}
 .foot nav{display:flex; gap:28px; flex-wrap:wrap; color:var(--muted)}
 .foot nav a{text-decoration:none}
+.rights{order:3; flex-basis:100%; margin:6px 0 0; font-size:12.5px; line-height:1.55; color:var(--muted); max-width:62ch}
 
 
 /* ——— calla bloom ——— */
@@ -476,6 +480,7 @@ body.in-book main{z-index:4}
 
 <footer class="foot" id="foot">
   <div><div class="sig">Ricky Rajani</div><div class="ui" style="color:var(--muted);margin-top:10px">Paintings &amp; stories</div></div>
+  <p class="rights">© <span id="yr">2026</span> Ricky Rajani. All artwork and writing on this site are protected by copyright. They may not be reproduced, or used to train or create AI models, without written permission.</p>
   <nav class="ui" aria-label="Footer"><a href="#about">About</a><a href="#worlds">Worlds</a><a href="#collectors">Collectors List</a><a href="#contact">Contact</a></nav>
 </footer>
 
@@ -561,7 +566,7 @@ function startTraces(root){root.querySelectorAll(".trace").forEach(svg=>{const a
   setTimeout(()=>{try{am.beginElement()}catch(e){}},400)})}
 
 /* ——— the book ——— */
-/* Only the title page and dedication are published. The rest of the story and Plates I–IV are kept off the site until launch. */
+/* Only the title page, dedication and prologue are published. The rest of the story and Plates I–IV are kept off the site until launch. */
 const SITARA=[
  {key:"title",label:"Title page",theme:"blush"},
  {key: "prologue", num: "Prologue", theme: "bloom", left: "bloom", title: "The World That Never Changed"},
@@ -675,7 +680,7 @@ function side(sp,which){
   if(sp.key==="end"){return which==="left"
     ?`<div class="pin win">${windowHTML(`<div class="w-content" style="padding:16% 14% 10%">${medallion()}</div>`,{cls:"dusk"})}</div>`
     :`<div class="pin center">${lunette()}<p class="dedic">The Story of Sitara was written and painted by Ricky Rajani in New York.</p><button type="button" class="again sc" data-jump="0">Begin again</button></div>`}
-  if(!STORY)return lockSide(which);
+  if(!isOpen(sp))return lockSide(which);
   if(which==="left"){
     if(sp.plate){const p=PAINT[sp.key],src=STORY.img&&STORY.img[sp.key]||A(p.file),zf=STORY.img&&STORY.img[sp.key]?sp.key:p.file;return `<div class="pin win">${windowHTML(`<img src="${src}" alt="${p.alt}" draggable="false" loading="lazy">`,{img:true,zoom:zf,cap:`${sp.title}`})}<div class="cap"><b>${sp.title}</b></div></div>`}
     if(sp.left==="bloom")return `<div class="pin win">${windowHTML(callaSVG(),{cls:"light"})}<div class="cap"><span class="sc">The Bloom</span></div></div>`;
@@ -703,9 +708,9 @@ function readerHTML(){const fl=flowersSVG();return `<section class="view reader"
 function paint(i,only){const sp=SITARA[i];if(only!=="right")pL.innerHTML=side(sp,"left");if(only!=="left")pR.innerHTML=side(sp,"right");if(only!=="right")startTraces(pL);startMeteors(document.getElementById("book"))}
 function status(){const sp=SITARA[idx];document.getElementById("where").textContent=sp.title?`${sp.num} · ${sp.title}`:sp.label;
   document.querySelectorAll("#gems button").forEach((b,i)=>{b.classList.toggle("on",i<=idx);b.classList.toggle("here",i===idx)});
-  prev.disabled=idx===0;next.disabled=idx===SITARA.length-1||(!STORY&&idx>=1);}
+  prev.disabled=idx===0;next.disabled=idx===SITARA.length-1||!isOpen(SITARA[idx]);}
 function goto(n){
-  if(busy||n===idx||n<0||n>=SITARA.length)return;const dir=n>idx?1:-1;idx=n;applyTheme(STORY||n===0?SITARA[n].theme:"blush");status();
+  if(busy||n===idx||n<0||n>=SITARA.length)return;const dir=n>idx?1:-1;idx=n;applyTheme(isOpen(SITARA[n])?SITARA[n].theme:"blush");status();
   if(mobile()||reduced){paint(n);pL.animate?.([{opacity:0},{opacity:1}],{duration:700});pR.animate?.([{opacity:0},{opacity:1}],{duration:700});if(mobile())document.querySelector(".reader").scrollIntoView({behavior:reduced?"auto":"smooth"});return}
   busy=true;const book=document.getElementById("book");const src=dir>0?pR:pL;const front=src.innerHTML,st=src.scrollTop;
   const leaf=document.createElement("div");leaf.className="leafturn "+(dir>0?"fwd":"bwd");
@@ -715,7 +720,7 @@ function goto(n){
   requestAnimationFrame(()=>requestAnimationFrame(()=>leaf.classList.add("go")));
   setTimeout(()=>{paint(n,dir>0?"left":"right");(dir>0?pL:pR).scrollTop=0;leaf.remove();busy=false},1020);
 }
-function openCover(){const c=document.getElementById("cover");if(!c||c.classList.contains("open"))return;c.classList.add("open");applyTheme(STORY||idx===0?SITARA[idx].theme:"blush");setTimeout(()=>c.classList.add("gone"),reduced?0:2200)}
+function openCover(){const c=document.getElementById("cover");if(!c||c.classList.contains("open"))return;c.classList.add("open");applyTheme(isOpen(SITARA[idx])?SITARA[idx].theme:"blush");setTimeout(()=>c.classList.add("gone"),reduced?0:2200)}
 let pL,pR,prev,next;
 function mountReader(){
   main.innerHTML=readerHTML();pL=document.getElementById("pL");pR=document.getElementById("pR");prev=document.getElementById("prev");next=document.getElementById("next");
@@ -798,8 +803,9 @@ function initWorlds(root){if(reduced||!matchMedia("(pointer:fine)").matches)retu
 
 
 
-/* ——— Sitara: the title and dedication are open; the rest of the story is not published yet ——— */
-const STORY=null;
+/* ——— Sitara: the title, dedication and prologue are open; the rest of the story is not published yet ——— */
+const STORY={texts:{prologue:"There are some worlds so beautiful that no one ever thinks to leave them.\n~The Bloom was such a world.\nIt was a place where spring had lasted for as long as anyone could remember, where mornings arrived wrapped in rose-colored light and the air was sweet with flowers. The trees bent their branches toward the earth as though listening for secrets, and streams wound lazily through the gardens without a care in the world. Each evening, the sun settled behind the hills, only to rise again into a day so perfectly like the one before that no one thought to wonder whether tomorrow might be different.\nIn the Bloom, nothing ever wilted. No leaf turned brown, and no flower had ever learned the strange art of growing old. The gardens were always full, and the fairies who lived among them were happy. They had never known a world in which happiness could look any other way.\nPerhaps this was why no one had ever asked what lay beyond the garden.\nFor when a world gives you everything you have ever wanted, it is difficult to imagine that there might be something you have not yet learned to want.\nBut beyond the last curling petals, beyond the hills where sunlight seemed to linger forever, there was another world.\nAnd in that world, the stars were waiting."},img:{}};
+const isOpen=sp=>!!sp&&(sp.key==="title"||!!STORY.texts[sp.key]);
 function lockSide(which){return which==="left"
   ?`<div class="pin win">${windowHTML(`<div class="w-content" style="padding:16% 14% 10%">${medallion()}</div>`,{cls:"light"})}<div class="cap"><span class="sc">Coming soon</span></div></div>`
   :`<div class="pin center lock"><div class="gate-med">${medallion()}</div><span class="sc" style="color:var(--goldtext)">The story continues</span>
@@ -902,6 +908,7 @@ function contactHTML(){const rows=[
   <ul class="links">${rows.map(([k,v,href,act])=>`<li><span class="k ui" style="color:var(--muted)">${k}</span>${v?(href?`<a class="v" href="${href}"${href.startsWith("http")?' target="_blank" rel="noopener"':""}>${v}</a>`:`<span class="v">${v}</span>`):`<span class="v empty">Add your ${k.toLowerCase()}</span>`}
     ${act==="copy"?`<button class="act ui" type="button" data-copy="${v}">Copy</button>`:`<a class="act ui" href="${href}" target="_blank" rel="noopener">${act} ↗</a>`}</li>`).join("")}</ul></section>`}
 
+try{document.getElementById("yr").textContent=new Date().getFullYear()}catch(e){}
 /* ——— router ——— */
 const main=document.getElementById("main"),foot=document.getElementById("foot");
 function route(){let r=(location.hash||"#about").slice(1);if(r==="home")r="worlds";if(!["about","worlds","contact","sitara","collectors"].includes(r))r="about";
